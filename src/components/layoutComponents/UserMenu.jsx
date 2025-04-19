@@ -2,21 +2,38 @@ import { useState, useRef, useEffect } from 'react';
 import { ChevronDown, ChevronUp, User, LogOut } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
+import axios from 'axios';
 import { useAuth } from '../../context/AuthContext.jsx';
-import defaultAvatar from '../../assets/avatar.webp'; 
+import defaultAvatar from '../../assets/avatar.webp';
 
 const UserMenu = () => {
   const [open, setOpen] = useState(false);
+  const [user, setUser] = useState(null);  // Store user data from API
   const menuRef = useRef();
-  const { logout } = useAuth();
+  const { logout, token } = useAuth();
 
-  const storedUser = JSON.parse(localStorage.getItem('user'));
-  const username = storedUser?.username || 'Guest';
-  const email = storedUser?.email || 'Not Available';
-
-  const avatar = defaultAvatar;
+  const avatar = user?.avatar || defaultAvatar;  // Use user avatar or default avatar
+  const username = user?.username || 'Guest';
 
   const toggleMenu = () => setOpen((prev) => !prev);
+
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      try {
+        const response = await axios.get('https://crud-server-liard.vercel.app/api/profile', {
+          headers: { Authorization: `Bearer ${token}` },  // Use the token for authentication
+        });
+        setUser(response.data);
+      } catch (err) {
+        console.error('Error fetching profile:', err);
+        toast.error('Failed to fetch user profile');
+      }
+    };
+
+    if (token) {
+      fetchUserProfile();  // Fetch user data when the token is available
+    }
+  }, [token]);
 
   useEffect(() => {
     const handleClickOutside = (e) => {
