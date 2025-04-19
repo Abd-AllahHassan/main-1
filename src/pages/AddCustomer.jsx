@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Helmet } from 'react-helmet';
 import { motion } from 'framer-motion';
 import axios from 'axios';
@@ -41,7 +41,7 @@ const AddCustomer = () => {
       };
 
       const response = await axios.post(
-        'https://crud-server-liard.vercel.app/api/users',
+        'https://crud-server-liard.vercel.app/api/customers',
         payload,
         {
           headers: {

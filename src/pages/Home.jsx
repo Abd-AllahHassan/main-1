@@ -4,21 +4,18 @@ import axios from 'axios';
 import MainTable from '../components/layoutComponents/MainTable';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { useSearch } from '../context/SearchContext'; // Import the useSearch hook
 
 const Home = () => {
   const [users, setUsers] = useState([]);
+  const [filteredUsers, setFilteredUsers] = useState([]);
   const [loadingUsers, setLoadingUsers] = useState(true);
   const [error, setError] = useState(null);
   const { token, loading: authLoading, error: authError } = useAuth();
   const navigate = useNavigate();
-  const [theme, setTheme] = useState('light'); // Default theme
+  const { searchQuery, setSearchQuery } = useSearch(); // Use the search query from context
 
-  // Get theme from localStorage on component mount
-  useEffect(() => {
-    const savedTheme = localStorage.getItem('theme') || 'light';
-    setTheme(savedTheme);
-  }, []);
-
+  // Fetch users on mount and when the search query or token changes
   useEffect(() => {
     if (authLoading) return;
 
@@ -30,7 +27,7 @@ const Home = () => {
     const fetchUsers = async () => {
       try {
         const response = await axios.get(
-          'https://crud-server-liard.vercel.app/api/users',
+          'https://crud-server-liard.vercel.app/api/customers',
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -52,10 +49,17 @@ const Home = () => {
     fetchUsers();
   }, [token, authLoading, navigate]);
 
+  // Filter users based on the search query
+  useEffect(() => {
+    const filtered = users.filter((user) =>
+      user.firstName.toLowerCase().startsWith(searchQuery.toLowerCase())    );
+    setFilteredUsers(filtered); // Set filtered users based on query
+  }, [searchQuery, users]);
+
   const handleDelete = async (userId) => {
     try {
       await axios.delete(
-        `https://crud-server-liard.vercel.app/api/users/${userId}`,
+        `https://crud-server-liard.vercel.app/api/customers/${userId}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -69,31 +73,22 @@ const Home = () => {
     }
   };
 
-  // Loading and error states remain the same...
-
   return (
-    <div className={`container mx-auto px-4 py-8 ${theme === 'dark' ? 'bg-gray-900 text-white' : 'bg-white text-gray-800'}`}>
+    <div className="container mx-auto px-4 py-8">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">User Management</h1>
         <Link
           to="/user/add"
-          className={`px-4 py-2 rounded ${
-            theme === 'dark' 
-              ? 'bg-blue-600 hover:bg-blue-700 text-white' 
-              : 'bg-blue-500 hover:bg-blue-600 text-white'
-          }`}
+          className="px-4 py-2 rounded bg-blue-500 hover:bg-blue-600 text-white"
         >
           Add New User
         </Link>
       </div>
-      
-      <div className={`shadow-md rounded-lg overflow-hidden ${
-        theme === 'dark' ? 'bg-gray-800' : 'bg-white'
-      }`}>
+
+      <div className="shadow-md rounded-lg overflow-hidden">
         <MainTable 
-          users={users} 
+          users={filteredUsers} // Pass filtered users to the table
           onDelete={handleDelete} 
-          theme={theme} 
         />
       </div>
     </div>

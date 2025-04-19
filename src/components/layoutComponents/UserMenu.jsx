@@ -3,31 +3,61 @@ import { ChevronDown, ChevronUp, User, LogOut } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { useAuth } from '../../context/AuthContext.jsx';
-import defaultAvatar from '../../assets/avatar.webp'; 
+import defaultAvatar from '../../assets/avatar.webp';
 
 const UserMenu = () => {
   const [open, setOpen] = useState(false);
   const menuRef = useRef();
   const { logout } = useAuth();
-
-  const storedUser = JSON.parse(localStorage.getItem('user'));
-  const username = storedUser?.username || 'Guest';
-  const email = storedUser?.email || 'Not Available';
-
   const avatar = defaultAvatar;
+
+  const [userData, setUserData] = useState({
+    username: 'Guest',
+    email: 'Not Available',
+  });
 
   const toggleMenu = () => setOpen((prev) => !prev);
 
+  // Sync user data from localStorage
+  const syncUserData = () => {
+    const storedUser = JSON.parse(localStorage.getItem('user'));
+    setUserData({
+      username: storedUser?.username || 'Guest',
+      email: storedUser?.email || 'Not Available',
+    });
+  };
+
+  // UseEffect to sync user data on initial load
   useEffect(() => {
+    syncUserData();
+
+    // Optional: Detect clicks outside the menu to close it
     const handleClickOutside = (e) => {
       if (menuRef.current && !menuRef.current.contains(e.target)) {
         setOpen(false);
       }
     };
+
     document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
   }, []);
 
+  // Detect changes in localStorage (across tabs/windows)
+  useEffect(() => {
+    const onStorageChange = () => {
+      syncUserData(); // Update userData whenever there's a change in localStorage
+    };
+
+    window.addEventListener('storage', onStorageChange);
+
+    return () => {
+      window.removeEventListener('storage', onStorageChange);
+    };
+  }, []);
+
+  // Handle logout functionality
   const handleLogout = () => {
     logout();
     setOpen(false);
@@ -47,7 +77,7 @@ const UserMenu = () => {
             className="w-10 h-10 rounded-full object-cover"
           />
           <div>
-            <p className="text-sm font-medium">{username}</p>
+            <p className="text-sm font-medium">{userData.username}</p>
             <p className="text-xs text-gray-400">Admin</p>
           </div>
         </div>
