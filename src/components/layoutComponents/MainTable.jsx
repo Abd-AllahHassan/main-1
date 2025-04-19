@@ -40,7 +40,7 @@ const MainTable = ({ users, onDelete, theme }) => {
               </td>
               <td className="px-4 py-2 flex justify-center space-x-2">
                 <Link
-                  to={`/user/${user._id}`}
+                  to={`/customers/${user._id}`}
                   className={`p-2 rounded hover:bg-blue-600 ${
                     theme === 'dark' 
                       ? 'bg-blue-700 text-white' 
@@ -52,7 +52,7 @@ const MainTable = ({ users, onDelete, theme }) => {
                 </Link>
                 
                 <Link
-                  to={`/user/edit/${user._id}`}
+                  to={`/customers/edit/${user._id}`}
                   className={`p-2 rounded hover:bg-blue-600 ${
                     theme === 'dark' 
                       ? 'bg-blue-700 text-white' 

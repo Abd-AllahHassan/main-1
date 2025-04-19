@@ -1,12 +1,13 @@
-import React, { useState } from 'react';
-import { Helmet } from 'react-helmet';
-import { motion } from 'framer-motion';
+import React, { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { toast } from 'react-toastify';
+import { Helmet } from 'react-helmet';
+import { motion } from 'framer-motion';
 
-const AddCustomer = () => {
+const EditCustomer = () => {
+  const { id } = useParams();
   const navigate = useNavigate();
   const { token } = useAuth();
   const [formData, setFormData] = useState({
@@ -19,6 +20,35 @@ const AddCustomer = () => {
     gender: ''
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const response = await axios.get(
+          `https://crud-server-liard.vercel.app/api/customers/${id}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        setFormData({
+          firstName: response.data.firstName,
+          lastName: response.data.lastName,
+          email: response.data.email,
+          number: response.data.number,
+          age: response.data.age.toString(),
+          country: response.data.country,
+          gender: response.data.gender
+        });
+      } catch (error) {
+        toast.error('Failed to fetch user details');
+        console.error('Error:', error);
+      }
+    };
+
+    fetchUser();
+  }, [id, token]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -33,42 +63,37 @@ const AddCustomer = () => {
     setIsSubmitting(true);
 
     try {
-      // Convert age to number if needed
       const payload = {
         ...formData,
         age: parseInt(formData.age),
-        number: formData.number.toString() // Ensure number is string if backend expects it
+        number: formData.number.toString()
       };
 
-      const response = await axios.post(
-        'https://crud-server-liard.vercel.app/api/customers',
+      await axios.put(
+        `https://crud-server-liard.vercel.app/api/customers/${id}`,
         payload,
         {
           headers: {
-            'Authorization': `Bearer ${token}`,
+            Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json'
           }
         }
       );
       
-      toast.success('Customer added successfully!');
+      toast.success('User updated successfully!');
       navigate('/home');
     } catch (error) {
-      console.error('Error details:', error.response?.data);
-      toast.error(
-        error.response?.data?.message || 
-        'Failed to add customer. Please check your data and try again.'
-      );
+      toast.error(error.response?.data?.message || 'Failed to update user');
+      console.error('Error:', error);
     } finally {
       setIsSubmitting(false);
     }
   };
 
-
   return (
     <>
       <Helmet>
-        <title>Add Customer</title>
+        <title>Edit Customer</title>
       </Helmet>
 
       <motion.form
@@ -78,6 +103,7 @@ const AddCustomer = () => {
         className="bg-white dark:bg-[#1e1e2f] p-6 transition-colors duration-200"
         onSubmit={handleSubmit}
       >
+        {/* Form fields (same as AddCustomer.js) */}
         {/* First Row */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
           {/* First Name */}
@@ -88,8 +114,7 @@ const AddCustomer = () => {
               name="firstName"
               value={formData.firstName}
               onChange={handleChange}
-              placeholder="First Name"
-              className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-white transition-colors duration-200"
+              className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-white"
               required
             />
           </div>
@@ -102,8 +127,7 @@ const AddCustomer = () => {
               name="lastName"
               value={formData.lastName}
               onChange={handleChange}
-              placeholder="Last Name"
-              className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-white transition-colors duration-200"
+              className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-white"
               required
             />
           </div>
@@ -119,8 +143,7 @@ const AddCustomer = () => {
               name="email"
               value={formData.email}
               onChange={handleChange}
-              placeholder="examble@gmail.com"
-              className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-white transition-colors duration-200"
+              className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-white"
               required
             />
           </div>
@@ -133,8 +156,7 @@ const AddCustomer = () => {
               name="number"
               value={formData.number}
               onChange={handleChange}
-              placeholder="01000000000"
-              className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-white transition-colors duration-200"
+              className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-white"
               required
             />
           </div>
@@ -150,8 +172,7 @@ const AddCustomer = () => {
               name="age"
               value={formData.age}
               onChange={handleChange}
-              placeholder="Age..."
-              className="w-1/2 p-2 border border-gray-300 dark:border-gray-600 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-white transition-colors duration-200"
+              className="w-1/2 p-2 border border-gray-300 dark:border-gray-600 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-white"
               required
             />
           </div>
@@ -163,10 +184,9 @@ const AddCustomer = () => {
               name="country"
               value={formData.country}
               onChange={handleChange}
-              className="w-1/2 p-2 border border-gray-300 dark:border-gray-600 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-white transition-colors duration-200"
+              className="w-1/2 p-2 border border-gray-300 dark:border-gray-600 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-white"
               required
             >
-              <option value="">Choose here...</option>
               <option value="Palestine">Palestine</option>
               <option value="Syria">Syria</option>
               <option value="Egypt">Egypt</option>
@@ -180,10 +200,9 @@ const AddCustomer = () => {
               name="gender"
               value={formData.gender}
               onChange={handleChange}
-              className="w-1/2 p-2 border border-gray-300 dark:border-gray-600 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-white transition-colors duration-200"
+              className="w-1/2 p-2 border border-gray-300 dark:border-gray-600 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-white"
               required
             >
-              <option value="">Choose here...</option>
               <option value="Male">Male</option>
               <option value="Female">Female</option>
             </select>
@@ -194,15 +213,15 @@ const AddCustomer = () => {
         <button
           type="submit"
           disabled={isSubmitting}
-          className={`bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 transition-colors duration-200 ${
+          className={`bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 ${
             isSubmitting ? 'opacity-70 cursor-not-allowed' : ''
           }`}
         >
-          {isSubmitting ? 'Adding...' : 'Add Customer'}
+          {isSubmitting ? 'Updating...' : 'Update Customer'}
         </button>
       </motion.form>
     </>
   );
 };
 
-export default AddCustomer;
+export default EditCustomer;
