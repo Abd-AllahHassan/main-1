@@ -150,11 +150,13 @@ const ViewCustomer = () => {
                     <span className="font-semibold">{user.lastName}</span>
                   </div>
                   <div className="flex items-center">
-                    <span className="w-24 font-medium text-gray-600 dark:text-gray-300">Email:</span>
-                    <span className="font-semibold flex items-center">
-                      <FiMail className="mr-2 text-blue-500" />
-                      {user.email}
-                    </span>
+                  <span className="w-24 font-medium text-gray-600 dark:text-gray-300">Email:</span>
+                      <span className="font-semibold flex items-center max-w-xs overflow-hidden">
+                        <FiMail className="mr-2 text-blue-500 flex-shrink-0" />
+                          <span className="truncate">
+                            {user.email}
+                            </span>
+                          </span>
                   </div>
                   <div className="flex items-center">
                     <span className="w-24 font-medium text-gray-600 dark:text-gray-300">Phone:</span>

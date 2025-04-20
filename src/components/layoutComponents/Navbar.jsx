@@ -4,7 +4,8 @@ import { motion } from 'framer-motion';
 import { useSearch } from '../../context/SearchContext'; // Import useSearch hook
 
 const Navbar = () => {
-  const { searchQuery, setSearchQuery } = useSearch(); // Use the search query from context
+  const { searchQuery, setSearchQuery } = useSearch(); // Context-based search
+  const [inputValue, setInputValue] = useState(''); // Local input state
   const [users, setUsers] = useState([]);
   const [filtered, setFiltered] = useState([]);
   const token = localStorage.getItem("token");
@@ -26,9 +27,9 @@ const Navbar = () => {
     fetchUsers();
   }, []);
 
-  // Use the search query from the context to filter users
+  // Filter users only when searchQuery (from context) changes
   useEffect(() => {
-    if (searchQuery.length === 0) {
+    if (searchQuery.trim().length === 0) {
       setFiltered([]);
       return;
     }
@@ -41,7 +42,7 @@ const Navbar = () => {
   }, [searchQuery, users]);
 
   const handleSearch = () => {
-    setSearchQuery(searchQuery); // Update the search query in context
+    setSearchQuery(inputValue.trim()); // Only set when button clicked
   };
 
   return (
@@ -51,9 +52,7 @@ const Navbar = () => {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6, ease: 'easeOut' }}
     >
-      <h1 className="text-3xl font-bold">
-        Main Dashboard
-      </h1>
+      <h1 className="text-3xl font-bold">Main Dashboard</h1>
 
       {/* Search Area */}
       <div className="relative w-full sm:w-auto mt-4 sm:mt-0">
@@ -61,8 +60,8 @@ const Navbar = () => {
           <input
             type="text"
             placeholder="Search..."
-            value={searchQuery}  // Use searchQuery from context
-            onChange={(e) => setSearchQuery(e.target.value)} // Update search query
+            value={inputValue}
+            onChange={(e) => setInputValue(e.target.value)}
             className="bg-white dark:bg-gray-800 text-black dark:text-white text-sm px-4 py-2 rounded-md outline-none w-full sm:w-52"
           />
           <button
@@ -72,7 +71,6 @@ const Navbar = () => {
             Search
           </button>
         </div>
-
       </div>
     </motion.div>
   );
